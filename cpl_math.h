@@ -7,8 +7,6 @@
 #ifndef CPL_MATH_H
 #define CPL_MATH_H
 
-#include <stddef.h>
-
 /* Come up with a value for CPL_MATH_FUNC if user did not specify. */
 
 /* If requested, consider all functions to have internal linkage. */
@@ -29,6 +27,8 @@
 #define CPL_MATH_FUNC
 #endif
 
+#define CPL_MATH_IS_ZERO(x) (((x) == 0.0f) || ((x) == -0.0f))
+
 /**
  * @defgroup cpl_math_api Math API
  *
@@ -46,6 +46,60 @@
  * */
 CPL_MATH_FUNC float
 cpl_math_rsqrt(float x);
+
+/**
+ * @brief Computes the square root of a value.
+ *
+ * @param x The value to compute the square root of.
+ *          The absolute value is considered instead of the value is negative.
+ *
+ * @return The square root of the given value @p x.
+ *         The square root of zero and negative zero is zero.
+ *
+ * @ingroup cpl_math_api
+ * */
+CPL_MATH_FUNC float
+cpl_math_sqrt(float x);
+
+/**
+ * @brief Computes the cube root of a value.
+ *
+ * @param x The value to compute the cube root of.
+ *
+ * @returns The approximated cube root of @p x.
+ *
+ * @ingroup cpl_math_api
+ * */
+CPL_MATH_FUNC float
+cpl_math_cbrt(float x);
+
+/**
+ * @brief Solves a quadratic equation for roots.
+ *
+ * @param in The input coefficients, which should consist of all three coefficients of the polynomial.
+ *
+ * @param roots The real components of each root of the equation.
+ *
+ * @return The number of real roots.
+ *
+ * @ingroup cpl_math_api
+ * */
+CPL_MATH_FUNC int
+cpl_math_solve_quadratic(const float* in, float* roots);
+
+/**
+ * @brief Solves a cubic equation for roots.
+ *
+ * @param in The coefficients of the cubic equation, starting from the highest degree to the lowest degree.
+ *
+ * @param roots The roots of the polynomial.
+ *
+ * @return The number of real roots.
+ *
+ * @ingroup cpl_math_api
+ * */
+CPL_MATH_FUNC int
+cpl_math_solve_cubic(const float* in, float* roots);
 
 /**
  * @brief Computes the dot product between two vectors.
@@ -142,8 +196,18 @@ cpl_math_gram_schmidt(const int num_dims, const float* a, float* q, float* r, fl
 
 #if defined(CPL_MATH_INTERNALS) || defined(CPL_MATH_IMPLEMENTATION)
 
-#ifndef CPL_MATH_RSQRT_ITERATIONS
-#define CPL_MATH_RSQRT_ITERATIONS 5
+#define CPL_MATH_ABS(x) (((x) < 0) ? -(x) : (x))
+
+#ifndef CPL_MATH_CBRT_THRESHOLD
+#define CPL_MATH_CBRT_THRESHOLD 0.00001f
+#endif
+
+#ifndef CPL_MATH_SQRT_THRESHOLD
+#define CPL_MATH_SQRT_THRESHOLD 0.00001f
+#endif
+
+#ifndef CPL_MATH_RSQRT_THRESHOLD
+#define CPL_MATH_RSQRT_THRESHOLD 0.00001f
 #endif
 
 /* These are function prototypes that are not part of the public API.
@@ -184,6 +248,108 @@ cpl_math__gram_schmidt_proj_sub(const int num_dims, const float* u, const float*
 /* Below this point is the implementation of the library.
  * Only look here if you're curious on how it works.
  */
+
+CPL_MATH_FUNC int
+cpl_math_solve_quadratic(const float* in, float* roots)
+{
+  /* The value of -b */
+  float neg_b;
+
+  /* The value of 1 / 2a */
+
+  float rcp_2a;
+
+  /* The value of the descriminant -> b^2 - 4ac */
+  float discriminant;
+
+  /* The square root of the descriminant */
+  float discriminant_sqrt;
+
+  neg_b = -in[1];
+
+  rcp_2a = 1 / (2 * in[0]);
+
+  discriminant = in[1] * in[1] - 4 * in[0] * in[2];
+
+  if (CPL_MATH_IS_ZERO(discriminant)) {
+    roots[0] = neg_b * rcp_2a;
+    roots[1] = roots[0];
+    return 1;
+  }
+
+  discriminant_sqrt = cpl_math_sqrt(discriminant);
+
+  roots[0] = (neg_b + discriminant_sqrt) * rcp_2a;
+  roots[1] = (neg_b - discriminant_sqrt) * rcp_2a;
+
+  return (discriminant < -0.0f) ? 0 : 2;
+}
+
+CPL_MATH_FUNC int
+cpl_math_solve_cubic(const float* in, float* roots)
+{
+  /* An implementation of the Cardano method */
+
+  /* The coefficients to the polynomial. */
+  float a;
+  float b;
+  float c;
+  float d;
+
+  /* Discriminant coefficients */
+  float q;
+  float r;
+  float discriminant;
+  float discriminant_sqrt_real;
+  float discriminant_sqrt_imag;
+
+  /* Temporary variables */
+  float s_real;
+  float s_imag;
+  float t_real;
+  float t_imag;
+  float b_div_3a;
+
+  a = in[0];
+  b = in[1];
+  c = in[2];
+  d = in[3];
+
+  b_div_3a = b / (3 * a);
+
+  q = (3 * a * c - b * b) / (9 * a * a);
+
+  r = (9 * a * b * c - 27 * a * a * d - 2 * b * b * b) / (54 * a * a * a);
+
+  discriminant = q * q * q + r * r;
+
+  discriminant_sqrt_real = cpl_math_sqrt(discriminant);
+  discriminant_sqrt_imag = (discriminant < -0.0f) ? 1.0f : 0.0f;
+
+  /* TODO : solve cube root of complex numbers. */
+
+  s_real = cpl_math_cbrt(r + discriminant_sqrt_real);
+  t_real = cpl_math_cbrt(r - discriminant_sqrt_real);
+
+  s_imag = discriminant_sqrt_imag;
+  t_imag = discriminant_sqrt_imag;
+
+  /* z = -0.5f * (s + t) - b_div_3a; */
+
+  /* h = 0.86602540378f * (s - t); */
+
+  if (CPL_MATH_IS_ZERO(discriminant)) {
+  }
+
+  (void)roots;
+  (void)b_div_3a;
+  (void)t_imag;
+  (void)s_imag;
+  (void)s_real;
+  (void)t_real;
+
+  return 0;
+}
 
 /**
  * @brief Computes the trace of a square matrix.
@@ -292,16 +458,73 @@ cpl_math_gram_schmidt(const int num_dims, const float* a, float* q, float* r, fl
 CPL_MATH_FUNC float
 cpl_math_rsqrt(const float x)
 {
-  int iteration;
+  float current_result;
+  float previous_result;
+  float abs_x;
 
-  float result;
+  abs_x = (x < 0) ? -x : x;
 
-  result = 1;
+  current_result = previous_result = 1;
 
-  for (iteration = 0; iteration < CPL_MATH_RSQRT_ITERATIONS; iteration++)
-    result = result * (1.5f - 0.5f * x * result * result);
+  while (1) {
 
-  return result;
+    current_result = previous_result * (1.5f - 0.5f * abs_x * previous_result * previous_result);
+
+    if (CPL_MATH_ABS(current_result - previous_result) < CPL_MATH_RSQRT_THRESHOLD)
+      break;
+
+    previous_result = current_result;
+  }
+
+  return current_result;
+}
+
+CPL_MATH_FUNC float
+cpl_math_sqrt(const float x)
+{
+  float current_result;
+  float previous_result;
+  float abs_x;
+
+  if (CPL_MATH_IS_ZERO(x))
+    return 0.0f;
+
+  abs_x = (x < 0) ? -x : x;
+
+  current_result = previous_result = abs_x * 0.5f;
+
+  while (1) {
+
+    current_result = 0.5f * (previous_result + abs_x / previous_result);
+
+    if (CPL_MATH_ABS(current_result - previous_result) < CPL_MATH_SQRT_THRESHOLD)
+      break;
+
+    previous_result = current_result;
+  }
+
+  return current_result;
+}
+
+CPL_MATH_FUNC float
+cpl_math_cbrt(const float x)
+{
+  float previous_result;
+  float current_result;
+
+  current_result = previous_result = x * (1.0f / 3.0f);
+
+  while (1) {
+    current_result = previous_result - (previous_result * previous_result * previous_result - x) /
+                                         (3 * previous_result * previous_result);
+
+    if (CPL_MATH_ABS(current_result - previous_result) < CPL_MATH_CBRT_THRESHOLD)
+      break;
+
+    previous_result = current_result;
+  }
+
+  return current_result;
 }
 
 CPL_MATH_FUNC float
