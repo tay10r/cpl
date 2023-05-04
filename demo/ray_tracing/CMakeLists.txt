@@ -16,6 +16,12 @@ FetchContent_Declare(teapot
 
 FetchContent_MakeAvailable(teapot)
 
+FetchContent_Declare(sponza
+  URL "https://casual-effects.com/g3d/data10/common/model/crytek_sponza/sponza.zip"
+  URL_HASH "SHA256=da005cbee0be2df2abc8513f3ceb61bcb6f69aac112babcd9c00169a27c2770c")
+
+FetchContent_MakeAvailable(sponza)
+
 FetchContent_Declare(tinyobjloader
   URL "https://github.com/tinyobjloader/tinyobjloader/archive/refs/tags/v2.0.0rc10.zip"
   URL_HASH "SHA256=07d5a575395a61f0fa80ea73290dbe5863ef3b67070d3ecda3f8305c40415cd1")
@@ -40,9 +46,10 @@ add_executable(main
 
 target_compile_definitions(main
   PRIVATE
-  CPL_BVH_LOGGING=1
   "CORNELL_BOX_PATH=\"${cornell_box_SOURCE_DIR}/CornellBox-Original.obj\""
-  "TEAPOT_PATH=\"${teapot_SOURCE_DIR}/teapot.obj\"")
+  "TEAPOT_PATH=\"${teapot_SOURCE_DIR}/teapot.obj\""
+  "SPONZA_PATH=\"${sponza_SOURCE_DIR}/sponza.obj\""
+  )
 
 target_include_directories(main PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../..")
 

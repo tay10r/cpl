@@ -17,7 +17,8 @@
 
 const std::vector<scene_descriptor> g_scene_descriptors{
   { "cornell_box", "Cornell Box", CORNELL_BOX_PATH, { 0, 1, 2.1 } },
-  { "teapot", "Teapot", TEAPOT_PATH, { 0, 40, 90 } }
+  { "teapot", "Teapot", TEAPOT_PATH, { 0, 40, 90 } },
+  { "sponza", "Sponza", SPONZA_PATH, { 0, 50, 0 }, { 1, 0, 0 } }
 };
 
 struct intersection_info
@@ -109,7 +110,11 @@ main(int argc, char** argv)
     const float u = (x + 0.5f) / img.width();
     const float v = (y + 0.5f) / img.height();
 
-    const auto dir = glm::normalize(glm::vec3((u * 2 - 1) * aspect, 1 - v * 2, -1));
+    constexpr auto up = glm::vec3(0, 1, 0);
+
+    const auto right = glm::cross(up, it->camera_direction);
+
+    const auto dir = glm::normalize(((u * 2 - 1) * aspect) * right + (1 - v * 2) * up + it->camera_direction);
 
     intersection_info info{ INFINITY, 0, s.get_position_buffer() };
 
@@ -130,8 +135,8 @@ main(int argc, char** argv)
     if (info.distance == INFINITY)
       continue;
 
-    img[i] = glm::vec3(info.distance, info.distance, info.distance);
-    // img[i] = glm::vec3(info.cost, info.cost, info.cost);
+    // img[i] = glm::vec3(info.distance, info.distance, info.distance);
+    img[i] = glm::vec3(info.cost, info.cost, info.cost);
   }
 
   glm::vec3 min_color(0, 0, 0);

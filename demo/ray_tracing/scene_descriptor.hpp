@@ -13,4 +13,6 @@ struct scene_descriptor final
   std::string path;
 
   glm::vec3 camera_origin{ 0, 0, 0 };
+
+  glm::vec3 camera_direction{ 0, 0, -1 };
 };
