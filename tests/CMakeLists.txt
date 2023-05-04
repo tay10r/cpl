@@ -12,7 +12,9 @@ FetchContent_MakeAvailable(googletest)
 
 add_library(cpl_testlib
   ../cpl_math.h
-  cpl_math.c)
+  ../cpl_pdb.h
+  cpl_math.c
+  cpl_pdb.c)
 
 if(CMAKE_COMPILER_IS_GNUCC)
   target_compile_options(cpl_testlib
@@ -21,7 +23,12 @@ if(CMAKE_COMPILER_IS_GNUCC)
 endif(CMAKE_COMPILER_IS_GNUCC)
 
 add_executable(cpl_tests
-  math_tests.cpp)
+  math_tests.cpp
+  pdb_tests.cpp)
+
+target_compile_definitions(cpl_tests
+  PRIVATE
+    "PROJECT_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\"")
 
 target_link_libraries(cpl_tests PRIVATE gtest gtest_main cpl_testlib)
 
