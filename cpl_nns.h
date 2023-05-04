@@ -4,6 +4,7 @@
  * @brief A library for performing nearest neighbor searches on point clouds, such as those produced by LiDAR scanners
  *        or N-body simulations.
  * */
+
 #pragma once
 
 #ifndef CPL_NNS_H
@@ -11,6 +12,10 @@
 
 #if !defined(CPL_NNS_FUNC) && defined(CPL_NNS_STATIC)
 #define CPL_NNS_FUNC static
+#endif
+
+#ifndef CPL_NNS_FUNC
+#define CPL_NNS_FUNC
 #endif
 
 /**
