@@ -35,3 +35,7 @@ target_link_libraries(cpl_tests PRIVATE gtest gtest_main cpl_testlib)
 if(CMAKE_COMPILER_IS_GNUCXX)
   target_compile_options(cpl_tests PRIVATE -Wall -Wextra -Werror -Wfatal-errors)
 endif(CMAKE_COMPILER_IS_GNUCXX)
+
+add_test(NAME cpl_tests COMMAND $<TARGET_FILE:cpl_tests>)
+
+enable_testing()

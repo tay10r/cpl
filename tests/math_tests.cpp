@@ -48,6 +48,18 @@ TEST(cpl_math, sqrt)
   EXPECT_EQ(cpl_math_sqrt(-0.0f), 0.0f);
 }
 
+TEST(cpl_math, to_polar)
+{
+  float xy[2]{ 2.000f, 3.464f };
+
+  float polar[2]{ 0, 0 };
+
+  cpl_math_to_polar(xy, polar);
+
+  EXPECT_NEAR(polar[0], 4.0000f, 0.001f);
+  EXPECT_NEAR(polar[1], 2.0944f, 0.001f);
+}
+
 TEST(cpl_math, solve_quadratic)
 {
   { // two real solutions

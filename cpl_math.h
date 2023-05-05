@@ -7,6 +7,12 @@
 #ifndef CPL_MATH_H
 #define CPL_MATH_H
 
+/**
+ * @defgroup cpl_math_api Math API
+ *
+ * @brief An API for various math functions.
+ * */
+
 /* Come up with a value for CPL_MATH_FUNC if user did not specify. */
 
 /* If requested, consider all functions to have internal linkage. */
@@ -27,13 +33,26 @@
 #define CPL_MATH_FUNC
 #endif
 
+/**
+ * @brief Indicates if a value is equal to zero or negative zero.
+ *
+ * @ingroup cpl_math_api
+ * */
 #define CPL_MATH_IS_ZERO(x) (((x) == 0.0f) || ((x) == -0.0f))
 
 /**
- * @defgroup cpl_math_api Math API
+ * @brief The value of pi in radians.
  *
- * @brief An API for various math functions.
+ * @ingroup cpl_math_api
  * */
+#define CPL_MATH_PI 3.14159265359f
+
+/**
+ * @brief The value of tau in radians.
+ *
+ * @ingroup cpl_math_api
+ * */
+#define CPL_MATH_TAU 6.28318530717f
 
 /**
  * @brief Computes the reciprocal square root of a value.
@@ -72,6 +91,42 @@ cpl_math_sqrt(float x);
  * */
 CPL_MATH_FUNC float
 cpl_math_cbrt(float x);
+
+/**
+ * @brief Converts degrees to radians.
+ *
+ * @param x The value in degrees to convert into radians.
+ *
+ * @return The value of @p x in radians.
+ *
+ * @ingroup cpl_math_api
+ * */
+CPL_MATH_FUNC float
+cpl_math_deg2rad(float x);
+
+/**
+ * @brief Converts radians to degrees.
+ *
+ * @param x The value in radians to convert into degrees.
+ *
+ * @return The value of @p x in degrees.
+ *
+ * @ingroup cpl_math_api
+ * */
+CPL_MATH_FUNC float
+cpl_math_rad2deg(float x);
+
+/**
+ * @brief Converts a set of xy coordinates to polar coordinates.
+ *
+ * @param xy_coords The XY coordinates to convert to polar coordinates.
+ *
+ * @param polar_coords The array to place the radius and angle into.
+ *
+ * @ingroup cpl_math_api
+ * */
+CPL_MATH_FUNC void
+cpl_math_to_polar(const float* xy_coords, float* polar_coords);
 
 /**
  * @brief Solves a quadratic equation for roots.
@@ -248,6 +303,37 @@ cpl_math__gram_schmidt_proj_sub(const int num_dims, const float* u, const float*
 /* Below this point is the implementation of the library.
  * Only look here if you're curious on how it works.
  */
+
+CPL_MATH_FUNC float
+cpl_math_deg2rad(const float x)
+{
+  return x * (CPL_MATH_PI / 180.0f);
+}
+
+CPL_MATH_FUNC float
+cpl_math_rad2deg(const float x)
+{
+  return x * (180.0f / CPL_MATH_PI);
+}
+
+CPL_MATH_FUNC void
+cpl_math_to_polar(const float* xy_coords, float* polar_coords)
+{
+  float x;
+  float y;
+  float r;
+  float angle;
+
+  x = xy_coords[0];
+  y = xy_coords[1];
+
+  r = cpl_math_sqrt(x * x + y * y);
+
+  angle = 0;
+
+  polar_coords[0] = r;
+  polar_coords[1] = angle;
+}
 
 CPL_MATH_FUNC int
 cpl_math_solve_quadratic(const float* in, float* roots)
