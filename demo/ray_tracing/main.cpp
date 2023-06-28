@@ -18,7 +18,8 @@
 const std::vector<scene_descriptor> g_scene_descriptors{
   { "cornell_box", "Cornell Box", CORNELL_BOX_PATH, { 0, 1, 2.1 } },
   { "teapot", "Teapot", TEAPOT_PATH, { 0, 40, 90 } },
-  { "sponza", "Sponza", SPONZA_PATH, { 0, 50, 0 }, { 1, 0, 0 } }
+  { "sponza", "Sponza", SPONZA_PATH, { 0, 50, 0 }, { 1, 0, 0 } },
+  { "suzzane", "Suzzane", "/mnt/e/Models//McGuire Test Scenes/suzzane/untitled.obj", { 0, 0, 3 } }
 };
 
 struct intersection_info

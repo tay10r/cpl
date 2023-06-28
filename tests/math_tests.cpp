@@ -26,6 +26,15 @@ TEST(cpl_math, cbrt)
   }
 }
 
+TEST(cpl_math, cbrt_complex)
+{
+  float roots[3];
+
+  cpl_math_cbrt_complex(0, 8, roots);
+
+  EXPECT_NEAR(roots[0], 0, 0.001f);
+}
+
 TEST(cpl_math, sqrt)
 {
   std::mt19937 rng(1234);
@@ -48,16 +57,39 @@ TEST(cpl_math, sqrt)
   EXPECT_EQ(cpl_math_sqrt(-0.0f), 0.0f);
 }
 
+TEST(cpl_math, atan2)
+{
+  EXPECT_NEAR(cpl_math_atan2(1, 1), 0.785398f, 0.001f);
+  EXPECT_NEAR(cpl_math_atan2(1, -1), 2.356194, 0.001f);
+  EXPECT_NEAR(cpl_math_atan2(-1, -1), -2.356194, 0.001f);
+  EXPECT_NEAR(cpl_math_atan2(-1, 1), -0.785398, 0.001f);
+  EXPECT_NEAR(cpl_math_atan2(0, -0), CPL_MATH_PI, 0.0001f);
+  EXPECT_NEAR(cpl_math_atan2(7, 0), CPL_MATH_PI * 0.5f, 0.0001f);
+}
+
 TEST(cpl_math, to_polar)
 {
-  float xy[2]{ 2.000f, 3.464f };
+  {
+    float xy[2]{ 12.0f, 5.0f };
 
-  float polar[2]{ 0, 0 };
+    float polar[2]{ 0, 0 };
 
-  cpl_math_to_polar(xy, polar);
+    cpl_math_to_polar(xy, polar);
 
-  EXPECT_NEAR(polar[0], 4.0000f, 0.001f);
-  EXPECT_NEAR(polar[1], 2.0944f, 0.001f);
+    EXPECT_NEAR(polar[0], 13.0f, 0.001f);
+    EXPECT_NEAR(polar[1], cpl_math_deg2rad(22.6f), 0.001f);
+  }
+
+  {
+    float xy[2]{ -3.0f, 10.0f };
+
+    float polar[2]{ 0, 0 };
+
+    cpl_math_to_polar(xy, polar);
+
+    EXPECT_NEAR(polar[0], 10.44f, 0.001f);
+    EXPECT_NEAR(polar[1], cpl_math_deg2rad(106.7f), 0.001f);
+  }
 }
 
 TEST(cpl_math, solve_quadratic)

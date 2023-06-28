@@ -55,6 +55,41 @@
 #define CPL_MATH_TAU 6.28318530717f
 
 /**
+ * @brief Gets the maximum of two values.
+ *
+ * @param a The left hand value.
+ *
+ * @param b The right hand value.
+ *
+ * @return The maximum of the two values.
+ *
+ * @ingroup cpl_math_api
+ * */
+#define CPL_MATH_MAX(a, b) (((a) > (b)) ? (a) : (b))
+
+/**
+ * @brief Gets the minimum of two values.
+ *
+ * @param a The left hand value.
+ *
+ * @param b The right hand value.
+ *
+ * @return The minimum of the two values.
+ *
+ * @ingroup cpl_math_api
+ * */
+#define CPL_MATH_MIN(a, b) (((a) < (b)) ? (a) : (b))
+
+/**
+ * @brief Gets the absolute value of a number.
+ *
+ * @param x The expression to get the absolute value of.
+ *
+ * @ingroup cpl_math_api
+ * */
+#define CPL_MATH_ABS(x) (((x) < 0) ? -(x) : (x))
+
+/**
  * @brief Computes the reciprocal square root of a value.
  *
  * @param x The value to compute the reciprocal square root of.
@@ -93,6 +128,20 @@ CPL_MATH_FUNC float
 cpl_math_cbrt(float x);
 
 /**
+ * @brief Computes the cube root of a complex number.
+ *
+ * @param x_real The real component of the complex number.
+ *
+ * @param x_imag The imaginary component of the complex number.
+ *
+ * @param roots The cube roots for the complex number.
+ *
+ * @ingroup cpl_math_api
+ * */
+CPL_MATH_FUNC void
+cpl_math_cbrt_complex(float x_real, float x_imag, float* roots);
+
+/**
  * @brief Converts degrees to radians.
  *
  * @param x The value in degrees to convert into radians.
@@ -115,6 +164,20 @@ cpl_math_deg2rad(float x);
  * */
 CPL_MATH_FUNC float
 cpl_math_rad2deg(float x);
+
+/**
+ * @brief Computes the arc tangent of an y / x ratio.
+ *
+ * @param y The y value of the ratio, which resides in the numerator.
+ *
+ * @param x The x value of the ratio, which resides in the denominator.
+ *
+ * @return The arc tangent of the x and y pair.
+ *
+ * @ingroup cpl_math_api
+ * */
+CPL_MATH_FUNC float
+cpl_math_atan2(float y, float x);
 
 /**
  * @brief Converts a set of xy coordinates to polar coordinates.
@@ -254,15 +317,15 @@ cpl_math_gram_schmidt(const int num_dims, const float* a, float* q, float* r, fl
 #define CPL_MATH_ABS(x) (((x) < 0) ? -(x) : (x))
 
 #ifndef CPL_MATH_CBRT_THRESHOLD
-#define CPL_MATH_CBRT_THRESHOLD 0.00001f
+#define CPL_MATH_CBRT_THRESHOLD 0.001f
 #endif
 
 #ifndef CPL_MATH_SQRT_THRESHOLD
-#define CPL_MATH_SQRT_THRESHOLD 0.00001f
+#define CPL_MATH_SQRT_THRESHOLD 0.001f
 #endif
 
 #ifndef CPL_MATH_RSQRT_THRESHOLD
-#define CPL_MATH_RSQRT_THRESHOLD 0.00001f
+#define CPL_MATH_RSQRT_THRESHOLD 0.001f
 #endif
 
 /* These are function prototypes that are not part of the public API.
@@ -316,23 +379,53 @@ cpl_math_rad2deg(const float x)
   return x * (180.0f / CPL_MATH_PI);
 }
 
+CPL_MATH_FUNC float
+cpl_math_atan2(float y, float x)
+{
+  float a;
+  float s;
+  float r;
+
+  if (y == -0.0f)
+    y = 0.0f;
+
+  if (x == -0.0f)
+    x = 0.0f;
+
+  if ((y == 0.0f) && (x == 0.0f))
+    return CPL_MATH_PI;
+
+  a = CPL_MATH_MIN(CPL_MATH_ABS(x), CPL_MATH_ABS(y)) / CPL_MATH_MAX(CPL_MATH_ABS(x), CPL_MATH_ABS(y));
+
+  s = a * a;
+
+  r = ((-0.0464964749f * s + 0.15931422f) * s - 0.327622764f) * s * a + a;
+
+  if (CPL_MATH_ABS(y) > CPL_MATH_ABS(x))
+    r = 1.57079637f - r;
+
+  if (x < 0)
+    r = CPL_MATH_PI - r;
+
+  if (y < 0)
+    r = -r;
+
+  return r;
+}
+
 CPL_MATH_FUNC void
 cpl_math_to_polar(const float* xy_coords, float* polar_coords)
 {
   float x;
   float y;
   float r;
-  float angle;
 
   x = xy_coords[0];
   y = xy_coords[1];
-
   r = cpl_math_sqrt(x * x + y * y);
 
-  angle = 0;
-
   polar_coords[0] = r;
-  polar_coords[1] = angle;
+  polar_coords[1] = cpl_math_atan2(y / r, x / r);
 }
 
 CPL_MATH_FUNC int
@@ -611,6 +704,14 @@ cpl_math_cbrt(const float x)
   }
 
   return current_result;
+}
+
+CPL_MATH_FUNC void
+cpl_math_cbrt_complex(float x_real, float x_imag, float* roots)
+{
+  (void)x_real;
+  (void)x_imag;
+  (void)roots;
 }
 
 CPL_MATH_FUNC float

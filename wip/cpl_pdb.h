@@ -261,7 +261,6 @@ cpl_pdb_read_from_line(const char* line, int line_size, void* user_data, const s
   (void)line_size;
   (void)user_data;
   (void)reader;
-  printf("%.*s", line_size, line);
   return 0;
 }
 

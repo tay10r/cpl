@@ -13,13 +13,13 @@ FetchContent_MakeAvailable(googletest)
 add_library(cpl_testlib
   ../cpl_math.h
   ../cpl_pdb.h
-  cpl_math.c
+  cpl_math.cpp
   cpl_pdb.c)
 
 if(CMAKE_COMPILER_IS_GNUCC)
   target_compile_options(cpl_testlib
     PRIVATE
-      -Wall -Wextra -Werror -Wfatal-errors -Wconversion -Wstrict-aliasing -std=c89 -pedantic -ansi -fanalyzer)
+      -Wall -Wextra -Werror -Wfatal-errors -Wconversion -Wstrict-aliasing -pedantic -fanalyzer)
 endif(CMAKE_COMPILER_IS_GNUCC)
 
 add_executable(cpl_tests
